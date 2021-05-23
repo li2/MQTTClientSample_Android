@@ -75,7 +75,7 @@ class ClientFragment : Fragment() {
                         override fun onSuccess(asyncActionToken: IMqttToken?) {
                             Log.d(this.javaClass.name, "Connection success")
 
-                            Toast.makeText(context, "MQTT Connection success", Toast.LENGTH_SHORT).show()
+//                            Toast.makeText(context, "MQTT Connection success", Toast.LENGTH_SHORT).show()
                         }
 
                         override fun onFailure(asyncActionToken: IMqttToken?, exception: Throwable?) {
@@ -214,5 +214,12 @@ class ClientFragment : Fragment() {
                 Log.d(this.javaClass.name, "Impossible to unsubscribe, no server connected")
             }
         }
+    }
+
+    override fun onDestroy() {
+        if (this::mqttClient.isInitialized) {
+            mqttClient.close()
+        }
+        super.onDestroy()
     }
 }

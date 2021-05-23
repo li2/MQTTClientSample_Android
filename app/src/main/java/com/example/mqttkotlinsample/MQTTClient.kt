@@ -130,4 +130,13 @@ class MQTTClient(context: Context?,
             e.printStackTrace()
         }
     }
+
+    fun close() {
+        try {
+            mqttClient.unregisterResources()
+            mqttClient.close()
+        } catch (e: MqttException) {
+            e.printStackTrace()
+        }
+    }
 }
