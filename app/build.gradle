@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.mqttkotlinsample"
-        minSdkVersion 16
+        minSdkVersion 26
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
@@ -48,4 +48,6 @@ dependencies {
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
     implementation 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.4'
     implementation 'org.eclipse.paho:org.eclipse.paho.android.service:1.1.1'
+
+    implementation "com.hivemq:hivemq-mqtt-client:1.2.2"
 }

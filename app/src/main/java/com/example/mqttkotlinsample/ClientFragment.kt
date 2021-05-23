@@ -15,6 +15,7 @@ import org.eclipse.paho.client.mqttv3.*
 
 class ClientFragment : Fragment() {
     private lateinit var mqttClient : MQTTClient
+    private lateinit var hiveMqttClient: HiveMqttClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,6 +66,10 @@ class ClientFragment : Fragment() {
                 clientId    != null    &&
                 username    != null    &&
                 pwd         != null        ) {
+
+            hiveMqttClient = HiveMqttClient(context, serverURI, clientId)
+            hiveMqttClient.connect()
+
             // Open MQTT Broker communication
             mqttClient = MQTTClient(context, serverURI, clientId)
 
