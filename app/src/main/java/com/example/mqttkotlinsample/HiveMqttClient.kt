@@ -18,25 +18,31 @@ class HiveMqttClient(
     serverHost: String,
     clientID: String
 ) {
-    var rxClient: Mqtt3RxClient = MqttClient.builder()
+//    val rxClient: Mqtt3RxClient = MqttClient.builder()
+//        .useMqttVersion3()
+//        .identifier(clientID)
+//        .serverHost(serverHost)
+//        .serverPort(SERVER_PORT)
+//        .sslWithDefaultConfig()
+//        .buildRx()
+
+    private val asyncClient: Mqtt3AsyncClient = MqttClient.builder()
         .useMqttVersion3()
         .identifier(clientID)
         .serverHost(serverHost)
-        .serverPort(SERVER_PORT)
-        .sslWithDefaultConfig()
-        .buildRx()
+        // connect to localhost://xxx.xxx.xx.xx:1883
+//        .serverPort(SERVER_PORT)
+//        .sslWithDefaultConfig()
+        .buildAsync()
 
     fun connect(
         username: String = "",
-        password: String = ""
+        password: String = "",
 //        cbConnect: IMqttActionListener = defaultCbConnect,
 //        cbClient: MqttCallback = defaultCbClient
+        onSuccess: () -> Unit = {},
+        onError: (Throwable?) -> Unit = {}
     ) {
-
-        val asyncClient: Mqtt3AsyncClient = MqttClient.builder()
-            .useMqttVersion3()
-            .buildAsync()
-
         asyncClient.connectWith()
 //            .simpleAuth()
 //            .username("my-user")
@@ -46,10 +52,10 @@ class HiveMqttClient(
             .whenComplete { connAck: Mqtt3ConnAck?, throwable: Throwable? ->
                 if (throwable != null) {
                     // handle failure
-                    Log.e(TAG, "HiveMqtt connection failed: ${throwable.message}", throwable)
+                    onError(throwable)
                 } else {
                     // setup subscribes or start publishing
-                    Log.d(TAG, "HiveMqtt connection succeed")
+                    onSuccess()
                 }
             }
 
@@ -70,9 +76,23 @@ class HiveMqttClient(
 
     fun subscribe(
         topic: String,
-        qos: Int = 1
 //        cbSubscribe: IMqttActionListener = defaultCbSubscribe
+        onSuccess: () -> Unit = {},
+        onError: (Throwable?) -> Unit = {}
     ) {
+        asyncClient.subscribeWith()
+            .topicFilter(topic)
+            .callback { publish ->
+                // Process the received message
+            }
+            .send()
+            .whenComplete { subAck, throwable: Throwable? ->
+                if (throwable != null) {
+                    onError(throwable)
+                } else {
+                    onSuccess()
+                }
+            }
     }
 
     fun unsubscribe(
@@ -85,9 +105,22 @@ class HiveMqttClient(
         topic: String,
         msg: String,
         qos: Int = 1,
-        retained: Boolean = false
+        retained: Boolean = false,
 //        cbPublish: IMqttActionListener = defaultCbPublish
+        onSuccess: () -> Unit = {},
+        onError: (Throwable?) -> Unit = {}
     ) {
+        asyncClient.publishWith()
+            .topic(topic)
+            .payload(msg.toByteArray())
+            .send()
+            .whenComplete { publish, throwable: Throwable? ->
+                if (throwable != null) {
+                    onError(throwable)
+                } else {
+                    onSuccess()
+                }
+            }
     }
 
     fun disconnect(

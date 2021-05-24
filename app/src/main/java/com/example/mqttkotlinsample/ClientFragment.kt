@@ -68,8 +68,15 @@ class ClientFragment : Fragment() {
                 pwd         != null        ) {
 
             hiveMqttClient = HiveMqttClient(context, serverURI, clientId)
-            hiveMqttClient.connect()
+            hiveMqttClient.connect(onSuccess = {
+                Log.d(TAG, "HiveMqtt connect to $serverURI succeed")
+            }, onError = {
+                Log.e(TAG, "HiveMqtt connect to $serverURI failed: ${it?.message}", it)
+                // Come back to Connect Fragment
+                findNavController().navigate(R.id.action_ClientFragment_to_ConnectFragment)
+            })
 
+            /*
             // Open MQTT Broker communication
             mqttClient = MQTTClient(context, serverURI, clientId)
 
@@ -108,6 +115,7 @@ class ClientFragment : Fragment() {
                             Log.d(this.javaClass.name, "Delivery complete")
                         }
                     })
+             */
         } else {
             // Arguments are not valid, come back to Connect Fragment
             findNavController().navigate(R.id.action_ClientFragment_to_ConnectFragment)
@@ -153,6 +161,12 @@ class ClientFragment : Fragment() {
             val topic   = view.findViewById<EditText>(R.id.edittext_pubtopic).text.toString()
             val message = view.findViewById<EditText>(R.id.edittext_pubmsg).text.toString()
 
+            hiveMqttClient.publish(topic, message, 1, false, onSuccess = {
+                Log.d(TAG, "Publish message: $message to topic: $topic succeed")
+            }, onError = {
+                Log.e(TAG, "Publish message: $message to topic: $topic failed", it)
+            })
+            /*
             if (mqttClient.isConnected()) {
                 mqttClient.publish(topic,
                                     message,
@@ -173,11 +187,19 @@ class ClientFragment : Fragment() {
             } else {
                 Log.d(this.javaClass.name, "Impossible to publish, no server connected")
             }
+             */
         }
 
         view.findViewById<Button>(R.id.button_subscribe).setOnClickListener {
             val topic   = view.findViewById<EditText>(R.id.edittext_subtopic).text.toString()
 
+            hiveMqttClient.subscribe(topic, onSuccess = {
+                Log.d(TAG, "Subscribe to $topic succeed")
+            }, onError = {
+                Log.e(TAG, "Subscribe to $topic failed", it)
+            })
+
+            /*
             if (mqttClient.isConnected()) {
                 mqttClient.subscribe(topic,
                         1,
@@ -196,6 +218,7 @@ class ClientFragment : Fragment() {
             } else {
                 Log.d(this.javaClass.name, "Impossible to subscribe, no server connected")
             }
+             */
         }
 
         view.findViewById<Button>(R.id.button_unsubscribe).setOnClickListener {
@@ -211,7 +234,7 @@ class ClientFragment : Fragment() {
                                 Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
                             }
 
-                            override fun onFailure(asyncActionToken: IMqttToken?, exception: Throwable?) {
+                            override fun onFailure(asyncActinToken: IMqttToken?, exception: Throwable?) {
                                 Log.d(this.javaClass.name, "Failed to unsubscribe: $topic")
                             }
                         })
@@ -226,5 +249,9 @@ class ClientFragment : Fragment() {
             mqttClient.close()
         }
         super.onDestroy()
+    }
+
+    companion object {
+        private val TAG = this::class.java.simpleName
     }
 }
