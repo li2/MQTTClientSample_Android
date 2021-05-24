@@ -1,53 +1,37 @@
 package com.example.mqttkotlinsample
 
 import android.content.Context
-import android.util.Log
 import com.hivemq.client.mqtt.MqttClient
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient
-import com.hivemq.client.mqtt.mqtt3.Mqtt3RxClient
 import com.hivemq.client.mqtt.mqtt3.message.connect.connack.Mqtt3ConnAck
+import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3Publish
+import com.hivemq.client.mqtt.mqtt3.message.subscribe.suback.Mqtt3SubAck
 
 /**
  * Integrate the HiveMQ MQTT Client library, connect to a broker,then subscribe to
  * a topic and publish messages to a topic using the MQTT 3 asynchronous API flavour.
  *
- * https://hivemq.github.io/hivemq-mqtt-client/docs/quick-start/
+ * - [Quick Start](https://hivemq.github.io/hivemq-mqtt-client/docs/quick-start)
+ * - [Reconnect Handling](https://www.hivemq.com/blog/hivemq-mqtt-client-features/reconnect-handling)
  */
 class HiveMqttClient(
-    context: Context?,
-    serverHost: String,
+    context: Context,
     clientID: String
 ) {
-//    val rxClient: Mqtt3RxClient = MqttClient.builder()
-//        .useMqttVersion3()
-//        .identifier(clientID)
-//        .serverHost(serverHost)
-//        .serverPort(SERVER_PORT)
-//        .sslWithDefaultConfig()
-//        .buildRx()
-
     private val asyncClient: Mqtt3AsyncClient = MqttClient.builder()
         .useMqttVersion3()
         .identifier(clientID)
-        .serverHost(serverHost)
-        // connect to localhost://xxx.xxx.xx.xx:1883
-//        .serverPort(SERVER_PORT)
-//        .sslWithDefaultConfig()
+        .automaticReconnectWithDefaultConfig()
+        .sslWithDefaultConfig()
         .buildAsync()
 
     fun connect(
-        username: String = "",
-        password: String = "",
 //        cbConnect: IMqttActionListener = defaultCbConnect,
 //        cbClient: MqttCallback = defaultCbClient
         onSuccess: () -> Unit = {},
         onError: (Throwable?) -> Unit = {}
     ) {
         asyncClient.connectWith()
-//            .simpleAuth()
-//            .username("my-user")
-//            .password("my-password".toByteArray())
-//            .applySimpleAuth()
             .send()
             .whenComplete { connAck: Mqtt3ConnAck?, throwable: Throwable? ->
                 if (throwable != null) {
@@ -58,16 +42,6 @@ class HiveMqttClient(
                     onSuccess()
                 }
             }
-
-/*
-        rxClient.connectWith()
-            .simpleAuth()
-            .username("my-user")
-            .password("my-password".toByteArray())
-            .applySimpleAuth()
-            .send()
-*/
-
     }
 
     fun isConnected(): Boolean {
@@ -82,11 +56,11 @@ class HiveMqttClient(
     ) {
         asyncClient.subscribeWith()
             .topicFilter(topic)
-            .callback { publish ->
+            .callback { publish: Mqtt3Publish ->
                 // Process the received message
             }
             .send()
-            .whenComplete { subAck, throwable: Throwable? ->
+            .whenComplete { subAck: Mqtt3SubAck?, throwable: Throwable? ->
                 if (throwable != null) {
                     onError(throwable)
                 } else {
@@ -114,7 +88,7 @@ class HiveMqttClient(
             .topic(topic)
             .payload(msg.toByteArray())
             .send()
-            .whenComplete { publish, throwable: Throwable? ->
+            .whenComplete { publish: Mqtt3Publish?, throwable: Throwable? ->
                 if (throwable != null) {
                     onError(throwable)
                 } else {
@@ -126,10 +100,10 @@ class HiveMqttClient(
     fun disconnect(
 //        cbDisconnect: IMqttActionListener = defaultCbDisconnect
     ) {
+        asyncClient.disconnect()
     }
 
     companion object {
         private val TAG = HiveMqttClient::class.java.simpleName
-        private const val SERVER_PORT = 1883
     }
 }
