@@ -70,9 +70,21 @@ class HiveMqttClient(
     }
 
     fun unsubscribe(
-        topic: String
+        topic: String,
 //        cbUnsubscribe: IMqttActionListener = defaultCbUnsubscribe
+        onSuccess: () -> Unit = {},
+        onError: (Throwable?) -> Unit = {}
     ) {
+        asyncClient.unsubscribeWith()
+            .topicFilter(topic)
+            .send()
+            .whenComplete { _, throwable: Throwable? ->
+                if (throwable != null) {
+                    onError(throwable)
+                } else {
+                    onSuccess()
+                }
+            }
     }
 
     fun publish(
