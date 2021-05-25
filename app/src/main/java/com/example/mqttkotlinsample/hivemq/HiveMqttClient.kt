@@ -30,10 +30,17 @@ class HiveMqttClient(clientID: String) : MqttClientAction {
         MqttClient.builder()
             .useMqttVersion3()
             .identifier(clientID)
-            .addDisconnectedListener { context ->
-                Log.e(tag, "disconnected source:${context.source}, cause:${context.cause.message}", context.cause)
-                context.reconnector.reconnect(true).delay(20, TimeUnit.SECONDS)
-            }
+//            .serverHost("://192.168.1.11")
+//            .serverPort(1883)
+//            .automaticReconnectWithDefaultConfig()
+//            .addDisconnectedListener { context ->
+//                Log.e(
+//                    tag,
+//                    "disconnected source:${context.source}, cause:${context.cause.message}",
+//                    context.cause
+//                )
+//                context.reconnector.reconnect(true).delay(20, TimeUnit.SECONDS)
+//            }
             .sslWithDefaultConfig()
             .buildAsync()
     }
@@ -42,7 +49,15 @@ class HiveMqttClient(clientID: String) : MqttClientAction {
         asyncClient
             .connectWith()
             .send()
-            .whenComplete(listener.toBiConsumer("Connect"))
+            .whenComplete { connAcK: Mqtt3ConnAck, throwable: Throwable? ->
+                if (throwable != null) {
+                    Log.e(tag, "connect failed: ${throwable.message}", throwable)
+                    listener?.onError(throwable)
+                } else {
+                    Log.d(tag, "connect succeed")
+                    listener?.onSuccess(connAcK)
+                }
+            }
     }
 
     override fun disconnect(listener: MqttClientActionListener<Void>?) {

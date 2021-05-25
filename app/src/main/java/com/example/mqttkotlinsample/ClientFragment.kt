@@ -73,7 +73,9 @@ class ClientFragment : Fragment() {
             hiveMqttClient = HiveMqttClient(clientId)
             hiveMqttClient.connect(object : MqttClientActionListener<Mqtt3ConnAck> {
                 override fun onError(throwable: Throwable) {
-                    findNavController().navigate(R.id.action_ClientFragment_to_ConnectFragment)
+                    activity?.runOnUiThread {
+                        findNavController().navigate(R.id.action_ClientFragment_to_ConnectFragment)
+                    }
                 }
             })
 
