@@ -31,7 +31,8 @@ android {
         jvmTarget = '1.8'
     }
     packagingOptions {
-        pickFirst  'META-INF/*'
+        exclude 'META-INF/INDEX.LIST'
+        exclude 'META-INF/io.netty.versions.properties'
     }
 }
 
