@@ -1,29 +1,29 @@
 package com.example.mqttkotlinsample
 
 import android.os.Bundle
+import android.util.Log
+import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.mqttkotlinsample.hivemq.HiveMqttClient
 import com.example.mqttkotlinsample.hivemq.MqttClientActionListener
 import com.hivemq.client.mqtt.mqtt3.message.connect.connack.Mqtt3ConnAck
+import org.eclipse.paho.client.mqttv3.*
 
 class ClientFragment : Fragment() {
-//    private lateinit var mqttClient : MQTTClient
+    private lateinit var mqttClient : MQTTClient
     private lateinit var hiveMqttClient: HiveMqttClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         activity?.onBackPressedDispatcher?.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                findNavController().navigate(R.id.action_ClientFragment_to_ConnectFragment)
-
-                /*
                 if (mqttClient.isConnected()) {
                     // Disconnect from MQTT Broker
                     mqttClient.disconnect(object : IMqttActionListener {
@@ -43,7 +43,6 @@ class ClientFragment : Fragment() {
                 } else {
                     Log.d(this.javaClass.name, "Impossible to disconnect, no server connected")
                 }
-                 */
             }
         })
     }
@@ -140,7 +139,6 @@ class ClientFragment : Fragment() {
         }
 
         view.findViewById<Button>(R.id.button_disconnect).setOnClickListener {
-            /*
             if (mqttClient.isConnected()) {
                 // Disconnect from MQTT Broker
                 mqttClient.disconnect(object : IMqttActionListener {
@@ -160,7 +158,6 @@ class ClientFragment : Fragment() {
             } else {
                 Log.d(this.javaClass.name, "Impossible to disconnect, no server connected")
             }
-             */
         }
 
         view.findViewById<Button>(R.id.button_publish).setOnClickListener {
@@ -223,7 +220,6 @@ class ClientFragment : Fragment() {
         view.findViewById<Button>(R.id.button_unsubscribe).setOnClickListener {
             val topic   = view.findViewById<EditText>(R.id.edittext_subtopic).text.toString()
 
-            /*
             if (mqttClient.isConnected()) {
                 mqttClient.unsubscribe( topic,
                         object : IMqttActionListener {
@@ -241,16 +237,13 @@ class ClientFragment : Fragment() {
             } else {
                 Log.d(this.javaClass.name, "Impossible to unsubscribe, no server connected")
             }
-             */
         }
     }
 
     override fun onDestroy() {
-        /*
         if (this::mqttClient.isInitialized) {
             mqttClient.close()
         }
-         */
         super.onDestroy()
     }
 
