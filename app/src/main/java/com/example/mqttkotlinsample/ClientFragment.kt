@@ -24,6 +24,8 @@ class ClientFragment : Fragment() {
         super.onCreate(savedInstanceState)
         activity?.onBackPressedDispatcher?.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
+                findNavController().navigate(R.id.action_ClientFragment_to_ConnectFragment)
+                return
                 if (mqttClient.isConnected()) {
                     // Disconnect from MQTT Broker
                     mqttClient.disconnect(object : IMqttActionListener {

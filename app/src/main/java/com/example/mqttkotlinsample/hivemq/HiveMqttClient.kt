@@ -6,6 +6,7 @@
 package com.example.mqttkotlinsample.hivemq
 
 import android.util.Log
+import com.example.mqttkotlinsample.MQTT_SERVER_URI
 import com.hivemq.client.mqtt.MqttClient
 import com.hivemq.client.mqtt.datatypes.MqttQos
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient
@@ -24,26 +25,22 @@ import java.util.function.BiConsumer
  */
 class HiveMqttClient(clientID: String) : MqttClientAction {
 
-    private val tag = "${this::class.java.simpleName}#$clientID"
+    private val tag = "${this::class.java.simpleName}#$clientID#wy21"
 
-    private val asyncClient: Mqtt3AsyncClient by lazy {
+    private val asyncClient: Mqtt3AsyncClient =
         MqttClient.builder()
             .useMqttVersion3()
             .identifier(clientID)
-//            .serverHost("://192.168.1.11")
-//            .serverPort(1883)
+            .serverHost(MQTT_SERVER_URI)
+            .serverPort(1883)
 //            .automaticReconnectWithDefaultConfig()
-//            .addDisconnectedListener { context ->
-//                Log.e(
-//                    tag,
-//                    "disconnected source:${context.source}, cause:${context.cause.message}",
-//                    context.cause
-//                )
-//                context.reconnector.reconnect(true).delay(20, TimeUnit.SECONDS)
-//            }
+            .addDisconnectedListener { context ->
+                Log.e(tag, "disconnected source:${context.source}, cause:${context.cause.message}", context.cause)
+                context.reconnector.reconnect(true).delay(30, TimeUnit.SECONDS)
+            }
             .sslWithDefaultConfig()
             .buildAsync()
-    }
+
 
     override fun connect(listener: MqttClientActionListener<Mqtt3ConnAck>?) {
         asyncClient
