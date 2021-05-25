@@ -11,6 +11,9 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.navigation.fragment.findNavController
+import com.example.mqttkotlinsample.hivemq.HiveMqttClient
+import com.example.mqttkotlinsample.hivemq.MqttClientActionListener
+import com.hivemq.client.mqtt.mqtt3.message.connect.connack.Mqtt3ConnAck
 import org.eclipse.paho.client.mqttv3.*
 
 class ClientFragment : Fragment() {
@@ -67,13 +70,11 @@ class ClientFragment : Fragment() {
                 username    != null    &&
                 pwd         != null        ) {
 
-            hiveMqttClient = HiveMqttClient(context, serverURI, clientId)
-            hiveMqttClient.connect(onSuccess = {
-                Log.d(TAG, "HiveMqtt connect to $serverURI succeed")
-            }, onError = {
-                Log.e(TAG, "HiveMqtt connect to $serverURI failed: ${it?.message}", it)
-                // Come back to Connect Fragment
-                findNavController().navigate(R.id.action_ClientFragment_to_ConnectFragment)
+            hiveMqttClient = HiveMqttClient(clientId)
+            hiveMqttClient.connect(object : MqttClientActionListener<Mqtt3ConnAck> {
+                override fun onError(throwable: Throwable) {
+                    findNavController().navigate(R.id.action_ClientFragment_to_ConnectFragment)
+                }
             })
 
             /*
@@ -161,11 +162,8 @@ class ClientFragment : Fragment() {
             val topic   = view.findViewById<EditText>(R.id.edittext_pubtopic).text.toString()
             val message = view.findViewById<EditText>(R.id.edittext_pubmsg).text.toString()
 
-            hiveMqttClient.publish(topic, message, 1, false, onSuccess = {
-                Log.d(TAG, "Publish message: $message to topic: $topic succeed")
-            }, onError = {
-                Log.e(TAG, "Publish message: $message to topic: $topic failed", it)
-            })
+            hiveMqttClient.publish(topic, message.toByteArray())
+
             /*
             if (mqttClient.isConnected()) {
                 mqttClient.publish(topic,
@@ -193,11 +191,7 @@ class ClientFragment : Fragment() {
         view.findViewById<Button>(R.id.button_subscribe).setOnClickListener {
             val topic   = view.findViewById<EditText>(R.id.edittext_subtopic).text.toString()
 
-            hiveMqttClient.subscribe(topic, onSuccess = {
-                Log.d(TAG, "Subscribe to $topic succeed")
-            }, onError = {
-                Log.e(TAG, "Subscribe to $topic failed", it)
-            })
+            hiveMqttClient.subscribe(topic)
 
             /*
             if (mqttClient.isConnected()) {
