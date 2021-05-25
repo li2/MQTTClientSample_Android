@@ -6,13 +6,13 @@
 package com.example.mqttkotlinsample.hivemq
 
 import android.util.Log
-import com.example.mqttkotlinsample.MQTT_SERVER_URI
 import com.hivemq.client.mqtt.MqttClient
 import com.hivemq.client.mqtt.datatypes.MqttQos
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient
 import com.hivemq.client.mqtt.mqtt3.message.connect.connack.Mqtt3ConnAck
 import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3Publish
 import com.hivemq.client.mqtt.mqtt3.message.subscribe.suback.Mqtt3SubAck
+import java.net.InetSocketAddress
 import java.util.concurrent.TimeUnit
 import java.util.function.BiConsumer
 
@@ -23,7 +23,7 @@ import java.util.function.BiConsumer
  * - [Quick Start](https://hivemq.github.io/hivemq-mqtt-client/docs/quick-start)
  * - [Reconnect Handling](https://www.hivemq.com/blog/hivemq-mqtt-client-features/reconnect-handling)
  */
-class HiveMqttClient(clientID: String) : MqttClientAction {
+class HiveMqttClient(hostIpAddr: String, clientID: String) : MqttClientAction {
 
     private val tag = "${this::class.java.simpleName}#$clientID#wy21"
 
@@ -31,14 +31,11 @@ class HiveMqttClient(clientID: String) : MqttClientAction {
         MqttClient.builder()
             .useMqttVersion3()
             .identifier(clientID)
-            .serverHost(MQTT_SERVER_URI)
-            .serverPort(1883)
-//            .automaticReconnectWithDefaultConfig()
+            .serverAddress(InetSocketAddress(hostIpAddr, DEFAULT_PORT))
             .addDisconnectedListener { context ->
                 Log.e(tag, "disconnected source:${context.source}, cause:${context.cause.message}", context.cause)
                 context.reconnector.reconnect(true).delay(30, TimeUnit.SECONDS)
             }
-            .sslWithDefaultConfig()
             .buildAsync()
 
 
@@ -114,5 +111,9 @@ class HiveMqttClient(clientID: String) : MqttClientAction {
                 this?.onSuccess(t)
             }
         }
+    }
+
+    companion object {
+        private const val DEFAULT_PORT = 1883
     }
 }

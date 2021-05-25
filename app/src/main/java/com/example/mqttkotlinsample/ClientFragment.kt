@@ -72,7 +72,7 @@ class ClientFragment : Fragment() {
                 username    != null    &&
                 pwd         != null        ) {
 
-            hiveMqttClient = HiveMqttClient(clientId)
+            hiveMqttClient = HiveMqttClient(serverURI, clientId)
             hiveMqttClient.connect(object : MqttClientActionListener<Mqtt3ConnAck> {
                 override fun onError(throwable: Throwable) {
                     activity?.runOnUiThread {
