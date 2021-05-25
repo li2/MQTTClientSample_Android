@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MQTT Kotlin Sample App</string>
+    <string name="app_name">Paho MQTT Client</string>
     <!-- Strings used for fragments for navigation -->
     <string name="connect_fragment_label">Connect Fragment</string>
     <string name="client_fragment_label">Client Fragment</string>
